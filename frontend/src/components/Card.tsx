@@ -1,4 +1,5 @@
 import { useDraggable } from "@dnd-kit/core"
+import { Pencil, Trash2, Calendar, Clock } from "lucide-react"
 
 type Task = {
   id: number
@@ -16,96 +17,79 @@ type CardProps = {
   openEditModal: (task: Task) => void
 }
 
-export default function Card({
-  task,
-  deleteTask,
-  openEditModal
-}: CardProps) {
-  const { attributes, listeners, setNodeRef } = useDraggable({
-    id: task.id
-  })
+const priorityConfig = {
+  low:    { border: "border-l-emerald-500", badge: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30", label: "Baixa" },
+  medium: { border: "border-l-amber-500",   badge: "bg-amber-500/15 text-amber-400 border border-amber-500/30",   label: "Média" },
+  high:   { border: "border-l-rose-500",    badge: "bg-rose-500/15 text-rose-400 border border-rose-500/30",    label: "Alta"  },
+}
 
-  // Borda lateral
-  const priorityColor = {
-    low: "border-l-4 border-green-400",
-    medium: "border-l-4 border-yellow-400",
-    high: "border-l-4 border-red-400"
-  }
-
-  //  Badge da prioridade 
-  const priorityStyle = {
-    low: "bg-green-500/10 text-green-600 border border-green-200",
-    medium: "bg-yellow-500/10 text-yellow-600 border border-yellow-200",
-    high: "bg-red-500/10 text-red-600 border border-red-200"
-  }
+export default function Card({ task, deleteTask, openEditModal }: CardProps) {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: task.id })
+  const p = priorityConfig[task.priority]
 
   return (
     <div
       ref={setNodeRef}
-      className={`bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col gap-2 border border-gray-200 ${priorityColor[task.priority]}`}
+      className={`group bg-gray-800/90 backdrop-blur p-4 rounded-xl shadow-md hover:shadow-xl hover:shadow-black/40 transition-all duration-200 hover:-translate-y-0.5 flex flex-col gap-3 border border-white/8 border-l-4 ${p.border}`}
     >
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
-
-        {/* DRAG HANDLE */}
+      <div className="flex justify-between items-start gap-2">
         <div
           {...listeners}
           {...attributes}
-          className="cursor-grab active:cursor-grabbing font-semibold text-gray-800 flex-1"
+          className="cursor-grab active:cursor-grabbing font-semibold text-gray-100 text-sm leading-snug flex-1"
         >
           {task.title}
         </div>
 
-        {/* ACTIONS */}
         <div
-          className="flex gap-2 ml-2"
+          className="flex gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
           onPointerDown={(e) => e.stopPropagation()}
         >
           <button
-            onClick={(e) => {
-              e.stopPropagation()
-              openEditModal(task)
-            }}
-            className="text-blue-500 hover:scale-110 hover:text-blue-600 transition"
+            aria-label="Editar tarefa"
+            onClick={(e) => { e.stopPropagation(); openEditModal(task) }}
+            className="p-1.5 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/15 transition"
           >
-            ✏️
+            <Pencil size={13} />
           </button>
-
           <button
-            onClick={(e) => {
-              e.stopPropagation()
-              deleteTask(task.id)
-            }}
-            className="text-red-500 hover:scale-110 hover:text-red-600 transition"
+            aria-label="Excluir tarefa"
+            onClick={(e) => { e.stopPropagation(); deleteTask(task.id) }}
+            className="p-1.5 rounded-lg text-gray-500 hover:text-rose-400 hover:bg-rose-500/15 transition"
           >
-            🗑️
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
 
-      {/* DESCRIPTION */}
       {task.description && (
-        <p className="text-sm text-gray-600">
+        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
           {task.description}
         </p>
       )}
 
-      {/* PRIORIDADE */}
-      <div
-        className={`self-start px-2 py-1 rounded-full text-xs font-medium ${priorityStyle[task.priority]}`}
-      >
-        {task.priority === "high" && "🔴 Alta"}
-        {task.priority === "medium" && "🟡 Média"}
-        {task.priority === "low" && "🟢 Baixa"}
-      </div>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${p.badge}`}>
+          {p.label}
+        </span>
 
-      {/* DATA */}
-      {(task.date || task.time) && (
-        <div className="text-xs text-gray-500 flex justify-between">
-          <span>📅 {task.date}</span>
-          <span>⏰ {task.time}</span>
-        </div>
-      )}
+        {(task.date || task.time) && (
+          <div className="flex items-center gap-3 text-xs text-gray-600">
+            {task.date && (
+              <span className="flex items-center gap-1">
+                <Calendar size={11} />
+                {task.date}
+              </span>
+            )}
+            {task.time && (
+              <span className="flex items-center gap-1">
+                <Clock size={11} />
+                {task.time}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -10,6 +10,7 @@ const createJestConfig = nextJest({
 const config: Config = {
   testEnvironment: 'jsdom', // Fundamental para simular o navegador no React
   clearMocks: true,
+  restoreMocks: true, // restaura spyOn automaticamente após cada teste
 };
 
 // Exporta a configuração para o Jest usar o compilador do Next.js
